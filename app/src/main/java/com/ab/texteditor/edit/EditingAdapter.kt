@@ -1,5 +1,6 @@
-package com.ab.texteditor
+package com.ab.texteditor.edit
 
+import android.app.Activity
 import android.support.v7.widget.RecyclerView
 import android.text.Editable
 import android.text.TextWatcher
@@ -7,8 +8,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import com.ab.texteditor.model.Image
-import com.ab.texteditor.model.Text
+import com.ab.texteditor.R
+import com.ab.texteditor.RxNetworkHelper
+import com.ab.texteditor.model.ModelBase
+import com.ab.texteditor.model.TYPE_IMAGE_MODEL
+import com.ab.texteditor.model.TYPE_TEXT_MODEL
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.item_image.view.*
 import kotlinx.android.synthetic.main.item_text.view.*
@@ -17,10 +21,8 @@ import java.io.File
 /**
  * Created by: anirban on 16/11/17.
  */
-const val TYPE_TEXT = 100
-const val TYPE_IMAGE = 101
 
-class MainAdapter(val items: ArrayList<Any>) : RecyclerView.Adapter<MainAdapter.BaseViewHolder>() {
+class MainAdapter(val items: ArrayList<ModelBase>, val context: Activity) : RecyclerView.Adapter<MainAdapter.BaseViewHolder>() {
 
 
     override fun onBindViewHolder(holder: BaseViewHolder?, position: Int) {
@@ -29,7 +31,7 @@ class MainAdapter(val items: ArrayList<Any>) : RecyclerView.Adapter<MainAdapter.
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): BaseViewHolder {
         return when (viewType) {
-            TYPE_IMAGE -> ImageViewHolder(LayoutInflater.from(parent!!.context).inflate(R.layout.item_image, parent, false))
+            TYPE_IMAGE_MODEL -> ImageViewHolder(LayoutInflater.from(parent!!.context).inflate(R.layout.item_image, parent, false))
             else -> TextViewHolder(LayoutInflater.from(parent!!.context).inflate(R.layout.item_text, parent, false), CustomTextWatcher())
         }
     }
@@ -39,10 +41,7 @@ class MainAdapter(val items: ArrayList<Any>) : RecyclerView.Adapter<MainAdapter.
     }
 
     override fun getItemViewType(position: Int): Int {
-        return when (items[position]) {
-            is Text -> TYPE_TEXT
-            else -> TYPE_IMAGE
-        }
+        return items[position].type
     }
 
     abstract class BaseViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -53,14 +52,16 @@ class MainAdapter(val items: ArrayList<Any>) : RecyclerView.Adapter<MainAdapter.
         override fun bind(position: Int) {
             customTextWatcher.updatePosition = position
             view.text.addTextChangedListener(customTextWatcher)
-            view.text.setText(((items[position] as Text).text.toString()), TextView.BufferType.EDITABLE)
+            items[position].text?.apply {
+                view.text.setText(this, TextView.BufferType.EDITABLE)
+            }
         }
     }
 
     inner class ImageViewHolder(val view: View) : BaseViewHolder(view) {
         override fun bind(position: Int) {
             Picasso.with(view.context)
-                    .load(File((items[position] as Image).imageUrl))
+                    .load(File((items[position]).imageUrl))
                     .into(view.image)
         }
     }
@@ -71,7 +72,10 @@ class MainAdapter(val items: ArrayList<Any>) : RecyclerView.Adapter<MainAdapter.
 
 
         override fun afterTextChanged(p0: Editable?) {
-            (items[updatePosition] as Text).text = p0.toString()
+            p0?.toString()?.apply {
+                (items[updatePosition]).text = this
+                RxNetworkHelper.syncSubscriber(items.toList(), context)
+            }
 
         }
 
@@ -83,17 +87,24 @@ class MainAdapter(val items: ArrayList<Any>) : RecyclerView.Adapter<MainAdapter.
 
     }
 
-    fun add(image: Image) {
+    fun add(textOrImage: ModelBase) {
         val size = items.size
-        items.apply {
-            add(image.apply image@ { this@image.orderPosition = size })
-            add(Text().apply text@ { this@text.position = size + 1 })
+        if (textOrImage.type == TYPE_IMAGE_MODEL) {
+            items.apply {
+                add(textOrImage.apply image@ {
+                    this@image.position = size
+                    this@image.type = TYPE_IMAGE_MODEL
+                })
+                add(ModelBase().apply text@ { this@text.position = size })
+                RxNetworkHelper.syncSubscriber(this,context)
+            }
+        } else {
+            items.add(textOrImage.apply {
+                type = TYPE_TEXT_MODEL
+                position = size
+            })
         }
-        notifyDataSetChanged()
-    }
-
-    fun add(text: Text) {
-        items.add(text)
+        RxNetworkHelper.saveModel(textOrImage)
         notifyDataSetChanged()
     }
 }

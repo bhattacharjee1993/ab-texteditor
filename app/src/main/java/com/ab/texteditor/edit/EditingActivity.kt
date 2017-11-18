@@ -1,4 +1,4 @@
-package com.ab.texteditor
+package com.ab.texteditor.edit
 
 import android.annotation.TargetApi
 import android.content.Context
@@ -11,25 +11,27 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import com.ab.texteditor.R
+import com.ab.texteditor.RxNetworkHelper
 import com.ab.texteditor.base.BaseActivity
-import com.ab.texteditor.model.Image
-import com.ab.texteditor.model.Text
+import com.ab.texteditor.model.ModelBase
+import com.ab.texteditor.model.TYPE_IMAGE_MODEL
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : BaseActivity<RecyclerView, Any, Main.View, Main.Presenter>(), Main.View {
+class EditingActivity : BaseActivity<RecyclerView, ModelBase, Editing.View, Editing.Presenter>(), Editing.View {
 
-    private val adapter = MainAdapter(arrayListOf())
+    private val adapter = MainAdapter(arrayListOf(), this)
 
     override fun getErrorMessage(e: Throwable?, pullToRefresh: Boolean) = e?.message ?: ""
 
-    override fun createPresenter() = MainPresenter()
+    override fun createPresenter() = EditingPresenter()
 
     override fun loadData(pullToRefresh: Boolean) {
         presenter.initialSetup()
     }
 
-    override fun setData(data: Any?) {
-        adapter.add(data as Text)
+    override fun setData(data: ModelBase) {
+        adapter.add(data)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,13 +39,11 @@ class MainActivity : BaseActivity<RecyclerView, Any, Main.View, Main.Presenter>(
         setContentView(R.layout.activity_main)
 
         contentView.apply {
-            adapter = this@MainActivity.adapter
-            layoutManager = LinearLayoutManager(this@MainActivity)
+            adapter = this@EditingActivity.adapter
+            layoutManager = LinearLayoutManager(this@EditingActivity)
         }
 
         addImg.setOnClickListener {
-            UserPermission(READ_EXTERNAL_STORAGE, this)
-
             Intent().apply {
                 type = "image/*"
                 action = Intent.ACTION_GET_CONTENT
@@ -56,8 +56,9 @@ class MainActivity : BaseActivity<RecyclerView, Any, Main.View, Main.Presenter>(
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 101) {
-            adapter.add(Image().apply {
-                imageUrl = data?.data?.let { getPath(this@MainActivity, it) }
+            adapter.add(ModelBase().apply {
+                type = TYPE_IMAGE_MODEL
+                imageUrl = data?.data?.let { getPath(this@EditingActivity, it) }
                 imageUrl?.let { RxNetworkHelper.uploadFile(application, it) }
             })
         }

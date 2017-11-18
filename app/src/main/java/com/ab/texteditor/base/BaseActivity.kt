@@ -2,6 +2,7 @@ package com.ab.texteditor.base
 
 import android.Manifest
 import android.os.Build
+import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.content.PermissionChecker
@@ -21,7 +22,7 @@ abstract class BaseActivity<CV : View, M,
         ActivityCompat.OnRequestPermissionsResultCallback, PermissionListener {
 
     companion object {
-        const val READ_EXTERNAL_STORAGE = 100
+        const val WRITE_EXTERNAL_STORAGE = 100
     }
 
 
@@ -33,7 +34,7 @@ abstract class BaseActivity<CV : View, M,
 
         this.permissionListener = permissionListener
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (permissionCode == READ_EXTERNAL_STORAGE) {
+            if (permissionCode == WRITE_EXTERNAL_STORAGE) {
                 app_CheckAllCriticalPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             }
         } else {
@@ -54,6 +55,12 @@ abstract class BaseActivity<CV : View, M,
         }
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        UserPermission(WRITE_EXTERNAL_STORAGE, this)
+
+    }
+
     private fun requestPermission(perm: String) {
         if (!isPermissionDialogShowing) {
             isPermissionDialogShowing = true
@@ -64,14 +71,14 @@ abstract class BaseActivity<CV : View, M,
             for (j in permission.indices) {
                 permissions[j] = permission[j]
             }
-            ActivityCompat.requestPermissions(this, permissions, READ_EXTERNAL_STORAGE)
+            ActivityCompat.requestPermissions(this, permissions, WRITE_EXTERNAL_STORAGE)
         }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         var perm = ""
-        if (requestCode == READ_EXTERNAL_STORAGE) {
-            perm = Manifest.permission.READ_EXTERNAL_STORAGE
+        if (requestCode == WRITE_EXTERNAL_STORAGE) {
+            perm = Manifest.permission.WRITE_EXTERNAL_STORAGE
         }
         postCheckPermission(perm)
     }
@@ -86,7 +93,7 @@ abstract class BaseActivity<CV : View, M,
             if (res != PermissionChecker.PERMISSION_GRANTED) {
                 permissionListener?.getPermissionResult(false)
                 isPermissionDialogShowing = false
-                val message = if (perm == Manifest.permission.READ_EXTERNAL_STORAGE) {
+                val message = if (perm == Manifest.permission.WRITE_EXTERNAL_STORAGE) {
 //                    this.getString(R.string.permission_missing)
                     "Permission missing"
                 } else {
