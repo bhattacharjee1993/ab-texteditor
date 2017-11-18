@@ -39,7 +39,6 @@ class MainActivity : BaseActivity<RecyclerView, Any, Main.View, Main.Presenter>(
         contentView.apply {
             adapter = this@MainActivity.adapter
             layoutManager = LinearLayoutManager(this@MainActivity)
-
         }
 
         addImg.setOnClickListener {
@@ -59,6 +58,7 @@ class MainActivity : BaseActivity<RecyclerView, Any, Main.View, Main.Presenter>(
         if (requestCode == 101) {
             adapter.add(Image().apply {
                 imageUrl = data?.data?.let { getPath(this@MainActivity, it) }
+                imageUrl?.let { RxNetworkHelper.uploadFile(application, it) }
             })
         }
     }
