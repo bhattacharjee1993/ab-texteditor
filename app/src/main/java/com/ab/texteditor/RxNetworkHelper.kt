@@ -60,6 +60,7 @@ object RxNetworkHelper {
         val file = File(INTERNAL_STORAGE_PATH + deviceId + ".txt")
         var text = ""
 
+
         syncSubscription?.cancelOngoing()
         syncSubscription = Observable.from(items)
                 .subscribeOn(Schedulers.io())
@@ -68,7 +69,7 @@ object RxNetworkHelper {
                     it.save()
                     when (it.type) {
                         TYPE_TEXT_MODEL -> text += it.text
-                        else -> text += "|||||<<<<<" + it.fileName?.substring(1) + "|||||"
+                        else -> text += "|||||<<<<<" + it.fileName + "|||||"
                     }
                     it
                 }.toList()
@@ -103,6 +104,7 @@ object RxNetworkHelper {
         Observable.just(model)
                 .subscribeOn(Schedulers.io())
                 .subscribe({
+                    if(it.text != null  || it.imageUrl != null || it.fileName != null)
                     it.save()
                 }, {
 

@@ -1,6 +1,7 @@
 package com.ab.texteditor.preview
 
 import android.content.Context
+import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -49,6 +50,7 @@ class PreviewAdapter(val list: ArrayList<ModelBase>, val context: Context) : Rec
 
     inner class ImageViewHolder(val baseView: View) : BaseViewHolder(baseView) {
         override fun bind(model: ModelBase) {
+            baseView.setBackgroundColor(ContextCompat.getColor(baseView.context, R.color.off_white))
             Picasso.with(context)
                     .load(S3_LINK + model.fileName)
                     .into(view.image)

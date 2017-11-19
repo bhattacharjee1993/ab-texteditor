@@ -11,6 +11,11 @@ import io.realm.RealmMigration
  * Created by: anirban on 18/11/17.
  */
 class App : Application(), RealmMigration {
+
+    companion object {
+        var shouldSync: Boolean = false
+    }
+
     override fun migrate(realm: DynamicRealm?, oldVersion: Long, newVersion: Long) {
         //This is not handled intentionally
     }

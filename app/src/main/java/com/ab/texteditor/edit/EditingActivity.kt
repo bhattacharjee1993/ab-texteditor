@@ -30,7 +30,8 @@ class EditingActivity : BaseActivity<RecyclerView, ArrayList<ModelBase>, Editing
     override fun createPresenter() = EditingPresenter()
 
     override fun loadData(pullToRefresh: Boolean) {
-        presenter.initialSetup(this)
+
+//        presenter.initialSetup(this)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -46,7 +47,7 @@ class EditingActivity : BaseActivity<RecyclerView, ArrayList<ModelBase>, Editing
     }
 
     override fun setData(data: ArrayList<ModelBase>) {
-        adapter.add(data)
+        adapter.add(data, false)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,9 +80,14 @@ class EditingActivity : BaseActivity<RecyclerView, ArrayList<ModelBase>, Editing
                             imageUrl?.let { RxNetworkHelper.uploadFile(application, it) }
                         })
 
-            })
+            }, true)
 
         }
+    }
+
+    override fun getPermissionResult(value: Boolean) {
+        super.getPermissionResult(value)
+        presenter.initialSetup(this)
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)

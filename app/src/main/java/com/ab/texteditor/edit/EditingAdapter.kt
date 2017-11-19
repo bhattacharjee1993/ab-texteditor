@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import com.ab.texteditor.R
 import com.ab.texteditor.RxNetworkHelper
+import com.ab.texteditor.constants.S3_LINK
 import com.ab.texteditor.model.ModelBase
 import com.ab.texteditor.model.TYPE_IMAGE_MODEL
 import com.ab.texteditor.model.TYPE_TEXT_MODEL
@@ -60,7 +61,12 @@ class MainAdapter(val items: ArrayList<ModelBase>, val context: Activity) : Recy
 
     inner class ImageViewHolder(val view: View) : BaseViewHolder(view) {
         override fun bind(position: Int) {
-            Picasso.with(view.context)
+            val file = if (items[position].imageUrl == null) S3_LINK + items[position].fileName else null
+            file?.let {
+                Picasso.with(view.context)
+                        .load(it)
+                        .into(view.image)
+            } ?: Picasso.with(view.context)
                     .load(File((items[position]).imageUrl))
                     .into(view.image)
         }
@@ -87,23 +93,24 @@ class MainAdapter(val items: ArrayList<ModelBase>, val context: Activity) : Recy
 
     }
 
-    fun add(list: ArrayList<ModelBase>) {
-        val size = items.size
-        list.forEach {
-            textOrImage ->
+    fun add(list: ArrayList<ModelBase>, isNormalUpload: Boolean) {
+        list.forEach { textOrImage ->
             if (textOrImage.type == TYPE_IMAGE_MODEL) {
                 items.apply {
                     add(textOrImage.apply image@ {
-                        this@image.position = size
+                        this@image.position = items.size
                         this@image.type = TYPE_IMAGE_MODEL
                     })
-                    add(ModelBase().apply text@ { this@text.position = size })
-                    RxNetworkHelper.syncSubscriber(this,context)
+                    if (isNormalUpload)
+                        add(ModelBase().apply text@ {
+                            this@text.position = items.size
+                        })
+                    RxNetworkHelper.syncSubscriber(this, context)
                 }
             } else {
                 items.add(textOrImage.apply {
                     type = TYPE_TEXT_MODEL
-                    position = size
+                    position = items.size
                 })
             }
             RxNetworkHelper.saveModel(textOrImage)

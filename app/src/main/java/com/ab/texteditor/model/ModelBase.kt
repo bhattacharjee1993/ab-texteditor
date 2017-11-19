@@ -24,7 +24,7 @@ open class ModelBase : RealmObject(), Comparable<ModelBase> {
     open var imageUrl: String? = null
         set(value) {
             field = value
-            fileName = field?.substring(field?.lastIndexOf('/') ?: 0)
+            fileName = field?.substring(field?.lastIndexOf('/')?.plus(1) ?: 0)
         }
     open var isUploaded: Boolean = false
     open var fileName: String? = null
