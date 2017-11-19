@@ -27,6 +27,10 @@ class App : Application(), RealmMigration {
         Realm.setDefaultConfiguration(configuration)
 
         Realm.getInstance(configuration)
+
+        RxNetworkHelper.init(this)
+
+
     }
 
 

@@ -18,7 +18,7 @@ import com.ab.texteditor.model.ModelBase
 import com.ab.texteditor.model.TYPE_IMAGE_MODEL
 import kotlinx.android.synthetic.main.activity_main.*
 
-class EditingActivity : BaseActivity<RecyclerView, ModelBase, Editing.View, Editing.Presenter>(), Editing.View {
+class EditingActivity : BaseActivity<RecyclerView, ArrayList<ModelBase>, Editing.View, Editing.Presenter>(), Editing.View {
 
     private val adapter = MainAdapter(arrayListOf(), this)
 
@@ -27,10 +27,10 @@ class EditingActivity : BaseActivity<RecyclerView, ModelBase, Editing.View, Edit
     override fun createPresenter() = EditingPresenter()
 
     override fun loadData(pullToRefresh: Boolean) {
-        presenter.initialSetup()
+        presenter.initialSetup(this)
     }
 
-    override fun setData(data: ModelBase) {
+    override fun setData(data: ArrayList<ModelBase>) {
         adapter.add(data)
     }
 
@@ -56,11 +56,16 @@ class EditingActivity : BaseActivity<RecyclerView, ModelBase, Editing.View, Edit
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 101) {
-            adapter.add(ModelBase().apply {
-                type = TYPE_IMAGE_MODEL
-                imageUrl = data?.data?.let { getPath(this@EditingActivity, it) }
-                imageUrl?.let { RxNetworkHelper.uploadFile(application, it) }
+            adapter.add(ArrayList<ModelBase>().apply {
+                add(
+                        ModelBase().apply {
+                            type = TYPE_IMAGE_MODEL
+                            imageUrl = data?.data?.let { getPath(this@EditingActivity, it) }
+                            imageUrl?.let { RxNetworkHelper.uploadFile(application, it) }
+                        })
+
             })
+
         }
     }
 

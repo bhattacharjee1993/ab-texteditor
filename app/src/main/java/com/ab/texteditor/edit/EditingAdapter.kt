@@ -87,24 +87,28 @@ class MainAdapter(val items: ArrayList<ModelBase>, val context: Activity) : Recy
 
     }
 
-    fun add(textOrImage: ModelBase) {
+    fun add(list: ArrayList<ModelBase>) {
         val size = items.size
-        if (textOrImage.type == TYPE_IMAGE_MODEL) {
-            items.apply {
-                add(textOrImage.apply image@ {
-                    this@image.position = size
-                    this@image.type = TYPE_IMAGE_MODEL
+        list.forEach {
+            textOrImage ->
+            if (textOrImage.type == TYPE_IMAGE_MODEL) {
+                items.apply {
+                    add(textOrImage.apply image@ {
+                        this@image.position = size
+                        this@image.type = TYPE_IMAGE_MODEL
+                    })
+                    add(ModelBase().apply text@ { this@text.position = size })
+                    RxNetworkHelper.syncSubscriber(this,context)
+                }
+            } else {
+                items.add(textOrImage.apply {
+                    type = TYPE_TEXT_MODEL
+                    position = size
                 })
-                add(ModelBase().apply text@ { this@text.position = size })
-                RxNetworkHelper.syncSubscriber(this,context)
             }
-        } else {
-            items.add(textOrImage.apply {
-                type = TYPE_TEXT_MODEL
-                position = size
-            })
+            RxNetworkHelper.saveModel(textOrImage)
         }
-        RxNetworkHelper.saveModel(textOrImage)
+
         notifyDataSetChanged()
     }
 }

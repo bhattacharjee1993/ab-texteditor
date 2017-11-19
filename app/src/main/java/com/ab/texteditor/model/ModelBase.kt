@@ -1,5 +1,6 @@
 package com.ab.texteditor.model
 
+import com.vicpin.krealmextensions.queryAll
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
 import io.realm.annotations.RealmClass
@@ -28,4 +29,8 @@ open class ModelBase : RealmObject(), Comparable<ModelBase> {
     open var isUploaded: Boolean = false
     open var fileName: String? = null
     open var type: Int = TYPE_TEXT_MODEL
+
+    companion object {
+         fun hasData() = ModelBase().queryAll().isNotEmpty()
+    }
 }

@@ -24,6 +24,14 @@ object RxNetworkHelper {
     var credentialsProvider: CognitoCachingCredentialsProvider? = null
     private var syncSubscription: Subscription? = null
 
+    fun init(application: Application){
+        credentialsProvider = credentialsProvider ?: CognitoCachingCredentialsProvider(
+                application, /* get the context for the application */
+                "ap-south-1:b7e4b37c-38b7-441f-9fbb-0a37e5cae43a", /* Identity Pool ID */
+                Regions.AP_SOUTH_1           /* Region for your identity pool--US_EAST_1 or EU_WEST_1*/
+        )
+    }
+
     fun uploadFile(application: Application, filePath: String) {
         credentialsProvider = credentialsProvider ?: CognitoCachingCredentialsProvider(
                 application, /* get the context for the application */
