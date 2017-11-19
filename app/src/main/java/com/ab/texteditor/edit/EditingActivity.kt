@@ -11,11 +11,14 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.view.Menu
+import android.view.MenuItem
 import com.ab.texteditor.R
 import com.ab.texteditor.RxNetworkHelper
 import com.ab.texteditor.base.BaseActivity
 import com.ab.texteditor.model.ModelBase
 import com.ab.texteditor.model.TYPE_IMAGE_MODEL
+import com.ab.texteditor.preview.PreviewActivity
 import kotlinx.android.synthetic.main.activity_main.*
 
 class EditingActivity : BaseActivity<RecyclerView, ArrayList<ModelBase>, Editing.View, Editing.Presenter>(), Editing.View {
@@ -28,6 +31,18 @@ class EditingActivity : BaseActivity<RecyclerView, ArrayList<ModelBase>, Editing
 
     override fun loadData(pullToRefresh: Boolean) {
         presenter.initialSetup(this)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.preview, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        when (item?.itemId) {
+            R.id.preview -> startActivity(Intent(this, PreviewActivity::class.java))
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     override fun setData(data: ArrayList<ModelBase>) {

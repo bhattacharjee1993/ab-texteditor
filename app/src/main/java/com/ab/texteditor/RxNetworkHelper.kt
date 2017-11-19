@@ -24,7 +24,7 @@ object RxNetworkHelper {
     var credentialsProvider: CognitoCachingCredentialsProvider? = null
     private var syncSubscription: Subscription? = null
 
-    fun init(application: Application){
+    fun init(application: Application) {
         credentialsProvider = credentialsProvider ?: CognitoCachingCredentialsProvider(
                 application, /* get the context for the application */
                 "ap-south-1:b7e4b37c-38b7-441f-9fbb-0a37e5cae43a", /* Identity Pool ID */
@@ -68,19 +68,20 @@ object RxNetworkHelper {
                     it.save()
                     when (it.type) {
                         TYPE_TEXT_MODEL -> text += it.text
-                        else -> text += "<<<<<" + it.fileName + ">>>>>"
+                        else -> text += "|||||<<<<<" + it.fileName?.substring(1) + "|||||"
                     }
                     it
                 }.toList()
                 .map {
-                    if(!file.exists()) {
+                    if (!file.exists()) {
                         file.parentFile.mkdirs()
-                        file.createNewFile()                    }
+                        file.createNewFile()
+                    }
                     file.writeText(text)
                     file
                 }.map {
             credentialsProvider = credentialsProvider ?: CognitoCachingCredentialsProvider(
-                   context.applicationContext, /* get the context for the application */
+                    context.applicationContext, /* get the context for the application */
                     "ap-south-1:b7e4b37c-38b7-441f-9fbb-0a37e5cae43a", /* Identity Pool ID */
                     Regions.AP_SOUTH_1           /* Region for your identity pool--US_EAST_1 or EU_WEST_1*/
             )
@@ -92,9 +93,9 @@ object RxNetworkHelper {
             )
         }
                 .subscribe({
-                    Log.e("TAG","Successful")
+                    Log.e("TAG", "Successful")
                 }, {
-                    Log.e("TAG",it.message)
+                    Log.e("TAG", it.message)
                 })
     }
 
