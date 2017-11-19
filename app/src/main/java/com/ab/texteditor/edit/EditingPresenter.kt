@@ -36,19 +36,19 @@ class EditingPresenter : MvpBasePresenter<Editing.View>(), Editing.Presenter {
                         })
 
                     val s3 = AmazonS3Client(RxNetworkHelper.credentialsProvider)
-                    val file = File(INTERNAL_STORAGE_PATH,Utils.getDeviceIdForPushNotification(context) + ".txt")
+                    val file = File(INTERNAL_STORAGE_PATH, Utils.getDeviceIdForPushNotification(context) + ".txt")
                     if (!file.exists()) {
                         file.parentFile.mkdirs()
                         file.createNewFile()
                     }
                     file.setReadable(true)
                     file.setWritable(true)
-                    val tempFile = File(INTERNAL_STORAGE_PATH,Utils.getDeviceIdForPushNotification(context) + "-temp.txt")
+                    val tempFile = File(INTERNAL_STORAGE_PATH, Utils.getDeviceIdForPushNotification(context) + "-temp.txt")
                     if (!tempFile.exists()) {
                         tempFile.parentFile.mkdirs()
                         tempFile.createNewFile()
                     }
-                    Log.e("TAG",file.exists().toString())
+                    Log.e("TAG", file.exists().toString())
                     val objectData = s3.getObject("textediting/deviceContent", Utils.getDeviceIdForPushNotification(context) + ".txt")
                     TransferUtility(s3, context).download("textediting/deviceContent", Utils.getDeviceIdForPushNotification(context) + ".txt",
                             tempFile)
@@ -65,8 +65,8 @@ class EditingPresenter : MvpBasePresenter<Editing.View>(), Editing.Presenter {
                     writer.close()
                     reader.close()
 
-                    Log.e("TAG",file.readText())
-                    return@concatMap convertFileToDataList(context,file)
+                    Log.e("TAG", file.readText())
+                    return@concatMap convertFileToDataList(context, file)
                 }.observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
                     view?.showContent()
@@ -87,7 +87,7 @@ class EditingPresenter : MvpBasePresenter<Editing.View>(), Editing.Presenter {
     }
 
     private fun convertFileToDataList(context: Context, file: File): Observable<ArrayList<ModelBase>> {
-        Log.e("TAG",file.path+"/t"+file.exists())
+        Log.e("TAG", file.path + "/t" + file.exists())
         return Observable.just(file)
                 .concatMap {
                     val text = it.readText()
@@ -112,17 +112,11 @@ class EditingPresenter : MvpBasePresenter<Editing.View>(), Editing.Presenter {
                 }
                 list.add(model)
             }
-            Log.e("TAG","List size: "+list.size)
-           return@concatMap Observable.just(list.apply {
+            Log.e("TAG", "List size: " + list.size)
+            return@concatMap Observable.just(list.apply {
                 sort()
                 saveAll()
             })
         }
     }
-
-    private fun convertFileToList() {
-
-
-    }
-
 }

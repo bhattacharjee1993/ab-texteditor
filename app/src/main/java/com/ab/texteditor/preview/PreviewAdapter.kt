@@ -50,7 +50,7 @@ class PreviewAdapter(val list: ArrayList<ModelBase>, val context: Context) : Rec
 
     inner class ImageViewHolder(val baseView: View) : BaseViewHolder(baseView) {
         override fun bind(model: ModelBase) {
-            baseView.setBackgroundColor(ContextCompat.getColor(baseView.context, R.color.off_white))
+            baseView.setBackgroundColor(ContextCompat.getColor(baseView.context, R.color.white))
             Picasso.with(context)
                     .load(S3_LINK + model.fileName)
                     .into(view.image)

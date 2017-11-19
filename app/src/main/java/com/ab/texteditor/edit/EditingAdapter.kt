@@ -104,6 +104,7 @@ class MainAdapter(val items: ArrayList<ModelBase>, val context: Activity) : Recy
                     if (isNormalUpload)
                         add(ModelBase().apply text@ {
                             this@text.position = items.size
+                            this@text.text = ""
                         })
                     RxNetworkHelper.syncSubscriber(this, context)
                 }
